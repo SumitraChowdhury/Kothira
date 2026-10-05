@@ -5,9 +5,12 @@ import Image from "../components/Image";
 import RegImage from "../assets/reg.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { getAuth, createUserWithEmailAndPassword } from "firebase/auth";
+import {getAuth, sendEmailVerification,createUserWithEmailAndPassword,signInWithPopup,
+  GoogleAuthProvider,} from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import { ColorRing } from "react-loader-spinner";
+import { FcGoogle } from "react-icons/fc";
+
 
 const Registration = () => {
   const auth = getAuth();
@@ -57,6 +60,8 @@ const Registration = () => {
       setLoader(true);
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
+          sendEmailVerification(auth.currentUser)
+          
           toast.success("Registration completed");
 
           setTimeout(() => {
@@ -79,6 +84,16 @@ const Registration = () => {
 
       console.log("Login account");
     }
+  };
+  let handleGoogle = () => {
+    const provider = new GoogleAuthProvider();
+    signInWithPopup(auth, provider)
+      .then((result) => {
+       navigate("/home")
+      })
+      .catch((error) => {
+        const errorCode = error.code;
+      });
   };
 
   return (
@@ -105,6 +120,10 @@ const Registration = () => {
             <p className="text-lg text-black/50 font-normal font-nunito">
               Free register and you can enjoy it
             </p>
+            <div onClick={handleGoogle} className="cursor-pointer mt-4 w-[40%] flex gap-x-2 items-center justify-center border border-gray-400 py-3 px-6 rounded">
+              <FcGoogle />
+              <p>Login with Google</p>
+            </div>
             <TextField
               onChange={handleEmail}
               className="w-[70%] mt-10!"

@@ -5,8 +5,7 @@ import Image from "../components/Image";
 import RegImage from "../assets/reg.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {getAuth, sendEmailVerification,createUserWithEmailAndPassword,signInWithPopup,
-  GoogleAuthProvider,} from "firebase/auth";
+import {getAuth, sendEmailVerification, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,} from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import { ColorRing } from "react-loader-spinner";
 import { FcGoogle } from "react-icons/fc";

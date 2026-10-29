@@ -1,18 +1,22 @@
 import Grid from "@mui/material/Grid";
+import RegImage from "../assets/reg.png";
+import Image from "../components/Image";
 import TextField from "@mui/material/TextField";
 import Button from "@mui/material/Button";
-import Image from "../components/Image";
-import RegImage from "../assets/reg.png";
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {getAuth, sendEmailVerification, createUserWithEmailAndPassword, signInWithPopup, GoogleAuthProvider,} from "firebase/auth";
+import {
+  getAuth,
+  createUserWithEmailAndPassword,
+  sendEmailVerification,
+} from "firebase/auth";
 import { ToastContainer, toast } from "react-toastify";
 import { ColorRing } from "react-loader-spinner";
-import { FcGoogle } from "react-icons/fc";
-
+import { getDatabase, push, ref, set } from "firebase/database";
 
 const Registration = () => {
   const auth = getAuth();
+  const db = getDatabase();
   const navigate = useNavigate();
 
   let [email, setEmail] = useState("");
@@ -23,13 +27,7 @@ const Registration = () => {
   let [nameerror, setNameError] = useState("");
   let [passworderror, setPasswordError] = useState("");
   let [loader, setLoader] = useState(false);
-
   let emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-  let lowercase = /^(?=.*[a-z])/;
-  let uppercase = /(?=.*[A-Z])/;
-  let digit = /(?=.*\d)/;
-  let special = /(?=.*[@$!%*?&])/;
-  let min_max = /[A-Za-z\d@$!%*?&]{8,}$/;
 
   let handleEmail = (e) => {
     setEmail(e.target.value);
@@ -43,7 +41,8 @@ const Registration = () => {
     setPassword(e.target.value);
     setPasswordError("");
   };
-  let handleSignIn = () => {
+
+  let handleSignUp = () => {
     if (!email) {
       setEmailError("Enter Your Email");
     } else if (!emailRegex.test(email)) {
@@ -59,40 +58,36 @@ const Registration = () => {
       setLoader(true);
       createUserWithEmailAndPassword(auth, email, password)
         .then((userCredential) => {
-          sendEmailVerification(auth.currentUser)
-          
-          toast.success("Registration completed");
+          // console.log(userCredential.user);
+          sendEmailVerification(auth.currentUser);
+          toast.success("Registration Successfully");
+          set(push(ref(db, "allusers/")), {
+            name: name,
+            email: userCredential.user.email,
+            userid: userCredential.user.uid,
+            dataofbirth: "",
+            coverphoto: "",
+            profilepic: "",
+            gender: "",
+          });
 
           setTimeout(() => {
-            navigate("/home");
-          }, 3000);
+            navigate("/login");
+          }, 2000);
           setLoader(false);
         })
         .catch((error) => {
           const errorCode = error.code;
           console.log(errorCode);
+          setLoader(false);
 
           if (errorCode.includes("auth/email-already-in-use")) {
-            toast.error("The Email is Already used");
+            setEmailError("Email Already Use");
           } else if (errorCode.includes("auth/weak-password")) {
-            setPasswordError("Minimum 6 digit required");
-          } else if (errorCode.includes("auth/too-many-requests")) {
-            toast.error("Try Later");
+            setPasswordError("Minimum 6 Digit");
           }
         });
-
-      console.log("Login account");
     }
-  };
-  let handleGoogle = () => {
-    const provider = new GoogleAuthProvider();
-    signInWithPopup(auth, provider)
-      .then((result) => {
-       navigate("/home")
-      })
-      .catch((error) => {
-        const errorCode = error.code;
-      });
   };
 
   return (
@@ -119,10 +114,6 @@ const Registration = () => {
             <p className="text-lg text-black/50 font-normal font-nunito">
               Free register and you can enjoy it
             </p>
-            <div onClick={handleGoogle} className="cursor-pointer mt-4 w-[40%] flex gap-x-2 items-center justify-center border border-gray-400 py-3 px-6 rounded">
-              <FcGoogle />
-              <p>Login with Google</p>
-            </div>
             <TextField
               onChange={handleEmail}
               className="w-[70%] mt-10!"
@@ -135,6 +126,7 @@ const Registration = () => {
                 {emailerror}
               </p>
             )}
+
             <TextField
               onChange={handleName}
               className="w-[70%] mt-5!"
@@ -172,7 +164,7 @@ const Registration = () => {
               />
             ) : (
               <Button
-                onClick={handleSignIn}
+                onClick={handleSignUp}
                 className="bg-[#5F35F5]! py-3! w-[70%] mt-10! mb-5! rounded-full!"
                 variant="contained"
               >
@@ -189,7 +181,6 @@ const Registration = () => {
           </div>
         </div>
       </Grid>
-
       <Grid size={6}>
         <Image className="w-full h-screen object-cover" src={RegImage} />
       </Grid>

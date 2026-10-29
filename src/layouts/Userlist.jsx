@@ -2,7 +2,7 @@ import { IoSearchOutline } from "react-icons/io5";
 import { BsThreeDotsVertical } from "react-icons/bs";
 import Profile from '../assets/profile.jpg'
 import Image from '../components/Image'
-import UserSection from '../components/userSection';
+import UserSection from "../components/UserSection.jsx";
 import TitleSection from '../components/TitleSection';
 import Searchbar from '../components/Searchbar';
 import { getDatabase, ref, onValue } from "firebase/database";
